@@ -1,0 +1,67 @@
+﻿@model FullTextSearch.Models.Search
+
+@{ 
+    ViewBag.Title = "Search";
+}
+
+<div class="well col-xs-12">
+    <form name="search" method="get">
+        <div class="col-md-6">
+            <input type="search" asp-for="Query" class="search-box" placeholder="Enter search terms..." />
+            <button>Search</button>
+        </div>
+        <div class="col-md-6">
+            <label>
+                <input type="checkbox" asp-for="MorphologyAndSemantics" name="ms" id="ms" />
+                <span class="form-label">Morphology and semantic</span>
+            </label>
+
+            <label>
+                <input type="checkbox" asp-for="FuzzyMatching" name="fm" id="fm" />
+                <span class="form-label">Fuzzy matching</span>
+            </label>
+        </div>
+    </form>
+</div>
+
+@if (Model.Results != null)
+{
+    if (Model.Results.Count() > 0)
+    {
+        <div class="page-header">
+            There were @Model.Results.Count() results found.
+        </div>
+        <div class="">
+            <p>SQL Query performed:</p>
+            <code>
+                @Html.Raw(Model.SqlQuery)
+            </code>
+        </div>
+        @foreach (var result in Model.Results)
+        {
+            <div class="blockquote-reverse">
+                <h3>
+                    <a href="/paper/@result.PdfName">
+                        @Html.Raw(result.Title)
+                    </a>
+                </h3>
+                <p>
+                    @Html.Raw(result.PaperText)
+                </p>
+            </div>
+
+        }
+
+    }
+    else
+    {
+        <p class="info">
+            <span class="glyphicon glyphicon-info-sign"></span>
+            There were no results found.
+        </p>
+    }
+
+}
+else {
+    <p>Have fun</p>
+}

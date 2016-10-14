@@ -36,3 +36,7 @@ textarea {
     display: none
   }
 }
+
+.search-box {
+    width: 100%;
+}
