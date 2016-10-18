@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using FullTextSearch.Models;
 
 namespace FullTextSearch.Tools
 {
     public class SearchQueryBuilder
     {
-        private readonly string _plainQuery;
+        private readonly string _userQuery;
+        private readonly SearchConcatenationOperator _op;
 
         /// <summary>
         /// Parses a plain user input search query and returns it in TSQuery form for PostgreSQL Full Text Search.
@@ -20,9 +23,10 @@ namespace FullTextSearch.Tools
         /// Furthermore, <code>(fast or cheap) and car</code> becomes <code>(fast | cheap) & car</code>.
         /// </example>
         /// <param name="plainQuery">The plain user input search query containing spaces ( ), double quotes (\") and keywords like and, or, not.</param>
-        public SearchQueryBuilder(string plainQuery)
+        public SearchQueryBuilder(string userQuery, SearchConcatenationOperator op)
         {
-            _plainQuery = plainQuery;
+            _userQuery = userQuery;
+            _op = op;
         }
 
         /// <summary>
@@ -32,23 +36,50 @@ namespace FullTextSearch.Tools
         {
             get
             {
-                return _plainQuery.Replace(' ', '|');
+                var rv = new StringBuilder();
+                var quotes = Regex.Matches(_userQuery, "\"([^\"]*)\"");
+                var concatenator = (_op == SearchConcatenationOperator.and) ? '&' : '|';
+                var quotedList = new List<string>();
+                foreach (var quote in quotes)
+                {
+                    quotedList.Add((quote.ToString().Replace("\"", "").Replace(' ', '&')));
+                }
+                rv.Append(string.Join(concatenator.ToString(), quotedList));
+                
+                var withoutQuotesSb = new StringBuilder();
+                for (int i = 0; i < _userQuery.Length; ++i)
+                {
+                    if (_userQuery[i] == '\"')
+                    do { ++i; } while (_userQuery[i] != '\"');
+                    else
+                        withoutQuotesSb.Append(_userQuery[i]);
+                }
+                string withoutQuotes = withoutQuotesSb.ToString().Trim();
+                if (quotedList.Count > 0 && withoutQuotes.Count() > 0)
+                    rv.Append(concatenator);
+                rv.Append(withoutQuotes.ToString().Replace(' ', concatenator));
+                return rv.ToString();
             }
         }
 
-        public string SqlQuery(bool morphologyAndSemantics, bool fuzzyMatching, int results = 10, int page = 1)
+        public string SqlQuery(SearchType type, int numberOfResults = 10, int page = 1)
         {
-            return @"SELECT id, pdfname, abstract, 
-	similarity(title, '@Term') sim,
-	ts_rank_cd(to_tsvector(title), '@Term'::TSQuery, 2) rank,
-	ts_headline(title, '@Term'::TSQuery) AS title,
-	ts_headline(papertext, '@Term'::TSQuery) AS papertext
-  FROM public.paper
-  WHERE papertext @@ '@Term'::TSQuery
-  ORDER BY rank DESC, sim DESC
-  LIMIT @Results OFFSET @Page;"
-            .Replace("@Term", this.TSQuery)
-            .Replace("@Results", results.ToString())
+            return
+    @"SELECT 	id, pdfname, eventtype
+	, ts_headline(result.title, query) AS title
+	, ts_headline(result.abstract, query) AS abstract
+	, ts_headline(result.papertext, query) AS papertext
+FROM (
+	SELECT	*
+	FROM    public.paper AS paper
+		, to_tsquery('english', '@TSQuery') AS query
+		, ts_rank_cd(tsv, query, 2) AS rank
+	WHERE   tsv @@ query
+	ORDER BY rank DESC
+	LIMIT @NumberOfResults OFFSET @Page
+) AS result;"
+            .Replace("@TSQuery", TSQuery)
+            .Replace("@NumberOfResults", numberOfResults.ToString())
             .Replace("@Page", page.ToString());
         }
     }

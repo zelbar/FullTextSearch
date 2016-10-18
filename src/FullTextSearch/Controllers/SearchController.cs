@@ -10,6 +10,7 @@ using Dapper;
 using System.Text;
 using FullTextSearch.Tools;
 using FullTextSearch.Models;
+using System.Diagnostics;
 
 namespace FullTextSearch.Controllers
 {
@@ -37,11 +38,15 @@ namespace FullTextSearch.Controllers
             {
                 using (var connection = Connection)
                 {
-                    var sqb = new SearchQueryBuilder(search.Query);
+                    var sqb = new SearchQueryBuilder(search.Query, search.Operator);
                     connection.Open();
                     var model = new Search();
-                    model.SqlQuery = sqb.SqlQuery(search.MorphologyAndSemantics, search.FuzzyMatching);
+                    model.SqlQuery = sqb.SqlQuery(search.Type, search.NumberOfResults, search.Page);
+                    var sw = new Stopwatch();
+                    sw.Start();
                     model.Results = connection.Query<Paper>(model.SqlQuery);
+                    sw.Stop();
+                    model.QueryTime = sw.ElapsedMilliseconds;
                     return View(model);
                 }
             }

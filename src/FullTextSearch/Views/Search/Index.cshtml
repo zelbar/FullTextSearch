@@ -4,64 +4,137 @@
     ViewBag.Title = "Search";
 }
 
-<div class="well col-xs-12">
-    <form name="search" method="get">
-        <div class="col-md-6">
-            <input type="search" asp-for="Query" class="search-box" placeholder="Enter search terms..." />
-            <button>Search</button>
-        </div>
-        <div class="col-md-6">
-            <label>
-                <input type="checkbox" asp-for="MorphologyAndSemantics" name="ms" id="ms" />
-                <span class="form-label">Morphology and semantic</span>
-            </label>
+<div id="page">
 
-            <label>
-                <input type="checkbox" asp-for="FuzzyMatching" name="fm" id="fm" />
-                <span class="form-label">Fuzzy matching</span>
-            </label>
-        </div>
-    </form>
-</div>
-
-@if (Model.Results != null)
-{
-    if (Model.Results.Count() > 0)
-    {
-        <div class="page-header">
-            There were @Model.Results.Count() results found.
-        </div>
-        <div class="">
-            <p>SQL Query performed:</p>
-            <code>
-                @Html.Raw(Model.SqlQuery)
-            </code>
-        </div>
-        @foreach (var result in Model.Results)
-        {
-            <div class="blockquote-reverse">
-                <h3>
-                    <a href="/paper/@result.PdfName">
-                        @Html.Raw(result.Title)
-                    </a>
-                </h3>
-                <p>
-                    @Html.Raw(result.PaperText)
-                </p>
+    <div class="well col-xs-12">
+        <form name="search" id="search-form" method="get">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </span>
+                    <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
+                </div>
             </div>
+            <div class="col-md-8">
+                <div class="col-md-4">
+                    Operator:
+                    <label>
+                        <input type="radio" asp-for="Operator" value="0" checked /> AND
+                    </label>
+                    <label>
+                        <input type="radio" asp-for="Operator" value="1" /> OR
+                    </label>
+                </div>
+                <div class="col-md-8">
+                    <label>
+                        <input type="radio" asp-for="Type" value="0" checked />
+                        <span class="form-label">Morphology and semantic</span>
+                    </label>
+                    <label>
+                        <input type="radio" asp-for="Type" value="1" />
+                        <span class="form-label">Fuzzy matching</span>
+                    </label>
+                </div>
+                <div>
+                    <label asp-for="NumberOfResults" class="control-label col-md-4">Number of results</label>
+                    <input type="range" id="num-of-res" min="1" max="500" class="col-md-8" asp-for="NumberOfResults" />
+                    <input type="number" asp-for="NumberOfResults" id="num-of-res-indicator" size="2" disabled />
+                </div>
+            </div>
+        </form>
+    </div>
 
+    @if (Model.Results != null)
+    {
+        var results = Model.Results.Count();
+        <div class="panel panel-default" id="search-query-panel">
+            <div class="panel-heading clearfix">
+                <a class="panel-title" data-toggle="collapse" data-target="#search-query">
+                    <span aria-hidden="true" class="glyphicon glyphicon-circle-arrow-down"></span>
+                    SQL Query performed in <em>@Model.QueryTime ms</em>. <small>(click to open the raw SQL query)</small>
+                </a>
+            </div>
+            <div class="panel-body panel-collapse collapse dropdown" id="search-query">
+                <pre>@Html.Raw(Model.SqlQuery)</pre>
+            </div>
+        </div>
+        if (results > 0)
+        {
+            <div class="page-header">
+                There were <strong>@results</strong> results found.<br />
+            </div>
+            @foreach (var result in Model.Results)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="badge">
+                            @result.EventType
+                        </span>
+                        <a class="panel-title" data-toggle="collapse" data-target="#result-@result.Id">
+                            @Html.Raw(result.Title)
+                        </a>
+                    </div>
+                    <div class="collapse dropdown" id="result-@result.Id">
+                        <div class="panel-body">
+                            <div class="pull-right">
+                                <a class="btn btn-sm btn-success" asp-action="Edit" asp-controller="Paper" asp-route-id="@result.Id">
+                                    <span class="glyphicon glyphicon-edit"></span> 
+                                    Edit
+                                </a>
+                                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-controller="Paper" asp-route-id="@result.Id">
+                                    <span class="glyphicon glyphicon-trash"></span> 
+                                    Delete
+                                </a>
+                            </div>
+                            <h4>@Html.Raw(result.Abstract)</h4>
+                            <h5>@Html.Raw(result.PaperText)</h5>
+                        </div>
+                        <div class="panel-footer small">
+                            <a href="/paper/@result.PdfName">
+                                <span class="glyphicon glyphicon-download-alt"></span>
+                                @result.PdfName
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            }
+
+        }
+        else
+        {
+            <p class="alert alert-warning">
+                <span class="glyphicon glyphicon-info-sign"></span>
+                There were no results found.
+            </p>
         }
 
     }
     else
     {
-        <p class="info">
-            <span class="glyphicon glyphicon-info-sign"></span>
-            There were no results found.
-        </p>
+        <p>Have fun</p>
     }
+</div>
 
-}
-else {
-    <p>Have fun</p>
+<div id="loading" class="well col-xs-12">
+    <span class="glyphicon glyphicon-search"></span> 
+    Searching...
+</div>
+
+@section Scripts {
+    <script>
+        $('#loading').hide();
+        $('#num-of-res').on('change', function () {
+            $('#num-of-res-indicator').attr('value', this.value);
+
+        });
+        $('#search-form').on('submit', function () {
+            $('#page').hide();
+            $('#loading').show();
+
+        })
+    </script>
 }
