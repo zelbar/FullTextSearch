@@ -64,6 +64,7 @@ namespace FullTextSearch.Tools
 
         public string SqlQuery(SearchType type, int numberOfResults = 10, int page = 1)
         {
+            if (page < 1) page = 1;
             return
     @"SELECT 	id, pdfname, eventtype
 	, ts_headline(result.title, query) AS title
@@ -76,7 +77,7 @@ FROM (
 		, ts_rank_cd(tsv, query, 2) AS rank
 	WHERE   tsv @@ query
 	ORDER BY rank DESC
-	LIMIT @NumberOfResults OFFSET @Page
+	LIMIT @NumberOfResults OFFSET (@Page - 1) * @NumberOfResults
 ) AS result;"
             .Replace("@TSQuery", TSQuery)
             .Replace("@NumberOfResults", numberOfResults.ToString())

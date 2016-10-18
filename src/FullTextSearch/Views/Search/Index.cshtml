@@ -4,122 +4,139 @@
     ViewBag.Title = "Search";
 }
 
-<div id="page">
 
-    <div class="well col-xs-12">
-        <form name="search" id="search-form" method="get">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-btn">
-                        <button type="submit" class="btn btn-primary">
-                            <span class="glyphicon glyphicon-search"></span>
-                        </button>
-                    </span>
-                    <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="col-md-4">
-                    Operator:
-                    <label>
-                        <input type="radio" asp-for="Operator" value="0" checked /> AND
-                    </label>
-                    <label>
-                        <input type="radio" asp-for="Operator" value="1" /> OR
-                    </label>
-                </div>
-                <div class="col-md-8">
-                    <label>
-                        <input type="radio" asp-for="Type" value="0" checked />
-                        <span class="form-label">Morphology and semantic</span>
-                    </label>
-                    <label>
-                        <input type="radio" asp-for="Type" value="1" />
-                        <span class="form-label">Fuzzy matching</span>
-                    </label>
-                </div>
-                <div>
-                    <label asp-for="NumberOfResults" class="control-label col-md-4">Number of results</label>
-                    <input type="range" id="num-of-res" min="1" max="500" class="col-md-8" asp-for="NumberOfResults" />
-                    <input type="number" asp-for="NumberOfResults" id="num-of-res-indicator" size="2" disabled />
-                </div>
-            </div>
-        </form>
-    </div>
-
-    @if (Model.Results != null)
-    {
-        var results = Model.Results.Count();
-        <div class="panel panel-default" id="search-query-panel">
-            <div class="panel-heading clearfix">
-                <a class="panel-title" data-toggle="collapse" data-target="#search-query">
-                    <span aria-hidden="true" class="glyphicon glyphicon-circle-arrow-down"></span>
-                    SQL Query performed in <em>@Model.QueryTime ms</em>. <small>(click to open the raw SQL query)</small>
-                </a>
-            </div>
-            <div class="panel-body panel-collapse collapse dropdown" id="search-query">
-                <pre>@Html.Raw(Model.SqlQuery)</pre>
-            </div>
+<form name="search" id="search-form" class="page-header col-xs-12" method="get">
+    <div class="col-sm-5 col-xs-12">
+        <div class="input-group">
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </span>
+            <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
         </div>
-        if (results > 0)
+    </div>
+    <div class="col-sm-7 col-xs-12">
+        <label asp-for="NumberOfResults" class="control-label col-sm-6 col-xs-12">Number of results</label>
+        <input type="range" min="1" max="500" class="col-sm-6 col-xs-12" asp-for="NumberOfResults" />
+        <span id="num-of-res-indicator" class="badge col-xs-1 hidden-xs">@Model.NumberOfResults</span>
+        <input type="hidden" asp-for="Page" />
+    </div>
+    <div class="col-md-5 col-sm-4">
+        Concatenation operator:
+        <label>
+            <input type="radio" asp-for="Operator" value="0" checked /> AND
+        </label>
+        <label>
+            <input type="radio" asp-for="Operator" value="1" /> OR
+        </label>
+    </div>
+    <div class="col-md-7 col-sm-8">
+        Type of search
+        <label>
+            <input type="radio" asp-for="Type" value="0" checked />
+            <span class="form-label">Morphology&amp;semantic</span>
+        </label>
+        <label>
+            <input type="radio" asp-for="Type" value="1" />
+            <span class="form-label">Fuzzy matching</span>
+        </label>
+    </div>
+</form>
+<span class="clearfix"></span>
+<div class="container">
+    <div id="results">
+        @if (Model.Results != null)
         {
-            <div class="page-header">
-                There were <strong>@results</strong> results found.<br />
+            var results = Model.Results.Count();
+            <div class="panel panel-default " id="search-query-panel">
+                <div class="panel-heading clearfix">
+                    <a class="panel-title" data-toggle="collapse" data-target="#search-query">
+                        <span aria-hidden="true" class="glyphicon glyphicon-circle-arrow-down"></span>
+                        SQL Query performed in <em>@Model.QueryTime ms</em>. <small>(click to open the raw SQL query)</small>
+                    </a>
+                </div>
+                <div class="panel-body panel-collapse collapse dropdown" id="search-query">
+                    <pre>@Html.Raw(Model.SqlQuery)</pre>
+                </div>
             </div>
-            @foreach (var result in Model.Results)
+            if (results > 0)
             {
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="badge">
-                            @result.EventType
-                        </span>
-                        <a class="panel-title" data-toggle="collapse" data-target="#result-@result.Id">
-                            @Html.Raw(result.Title)
-                        </a>
-                    </div>
-                    <div class="collapse dropdown" id="result-@result.Id">
-                        <div class="panel-body">
-                            <div class="pull-right">
-                                <a class="btn btn-sm btn-success" asp-action="Edit" asp-controller="Paper" asp-route-id="@result.Id">
-                                    <span class="glyphicon glyphicon-edit"></span> 
-                                    Edit
-                                </a>
-                                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-controller="Paper" asp-route-id="@result.Id">
-                                    <span class="glyphicon glyphicon-trash"></span> 
-                                    Delete
-                                </a>
-                            </div>
-                            <h4>@Html.Raw(result.Abstract)</h4>
-                            <h5>@Html.Raw(result.PaperText)</h5>
-                        </div>
-                        <div class="panel-footer small">
-                            <a href="/paper/@result.PdfName">
-                                <span class="glyphicon glyphicon-download-alt"></span>
-                                @result.PdfName
+                <div class="page-header">
+                    There were <strong>@results</strong> results found. Showing page @Model.Page<br />
+                </div>
+                @foreach (var result in Model.Results)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="badge">
+                                @result.EventType
+                            </span>
+                            <a class="panel-title" data-toggle="collapse" data-target="#result-@result.Id">
+                                @Html.Raw(result.Title)
                             </a>
                         </div>
+                        <div class="collapse dropdown" id="result-@result.Id">
+                            <div class="panel-body">
+                                <div class="pull-right">
+                                    <a class="btn btn-sm btn-success" asp-action="Edit" asp-controller="Paper" asp-route-id="@result.Id">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </a>
+                                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-controller="Paper" asp-route-id="@result.Id">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                        Delete
+                                    </a>
+                                </div>
+                                <h4>@Html.Raw(result.Abstract)</h4>
+                                <h5>@Html.Raw(result.PaperText)</h5>
+                            </div>
+                            <div class="panel-footer small">
+                                <a href="/paper/@result.PdfName">
+                                    <span class="glyphicon glyphicon-download-alt"></span>
+                                    @result.PdfName
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
+                }
             }
+            else
+            {
+                <p class="alert alert-warning">
+                    <span class="glyphicon glyphicon-info-sign"></span>
+                    There were no results found.
+                </p>
+            }
+
+            <div class="btn-block">
+                @if (Model.Page > 1)
+                {
+                    <a id="previous-results" class="btn btn-default">
+                        <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                        Previous results
+                    </a>
+
+                }
+                @if (Model.Results.Count() == Model.NumberOfResults)
+                {
+                    <a id="more-results" class="btn btn-primary">
+                        More results
+                        <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                    </a>
+
+                }
+            </div>
 
         }
         else
         {
-            <p class="alert alert-warning">
-                <span class="glyphicon glyphicon-info-sign"></span>
-                There were no results found.
-            </p>
+            <p>Have fun</p>
         }
-
-    }
-    else
-    {
-        <p>Have fun</p>
-    }
+    </div>
 </div>
 
-<div id="loading" class="well col-xs-12">
+<div id="loading" class="well page-header col-xs-12">
     <span class="glyphicon glyphicon-search"></span> 
     Searching...
 </div>
@@ -127,14 +144,28 @@
 @section Scripts {
     <script>
         $('#loading').hide();
-        $('#num-of-res').on('change', function () {
-            $('#num-of-res-indicator').attr('value', this.value);
-
+        $('#NumberOfResults').on('change', function () {
+            $('#num-of-res-indicator').html(this.value);
+            $('#Page').val(1);
         });
         $('#search-form').on('submit', function () {
-            $('#page').hide();
+            $('#results').hide();
             $('#loading').show();
-
+        });
+        $('#Query').on('change', function () {
+            $('#Page').val(1);
+        });
+        $('#Operator').on('change', function () {
+            $('#Page').val(1);
         })
+        $('#more-results').on('click', function () {
+            var p = $('#Page');
+            p.val(p.val()*1 + 1);
+            $('#search-form').submit();
+        });
+        $('#previous-results').on('click', function () {
+            window.history.back();
+
+        });
     </script>
 }

@@ -32,7 +32,7 @@ namespace FullTextSearch.Controllers
         }
 
         [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
-        public IActionResult Index(Search search)
+        public async Task<IActionResult> Index(Search search)
         {
             if (!string.IsNullOrEmpty(search.Query))
             {
@@ -40,14 +40,22 @@ namespace FullTextSearch.Controllers
                 {
                     var sqb = new SearchQueryBuilder(search.Query, search.Operator);
                     connection.Open();
-                    var model = new Search();
-                    model.SqlQuery = sqb.SqlQuery(search.Type, search.NumberOfResults, search.Page);
+                    search.SqlQuery = sqb.SqlQuery(search.Type, search.NumberOfResults, search.Page);
                     var sw = new Stopwatch();
                     sw.Start();
-                    model.Results = connection.Query<Paper>(model.SqlQuery);
+                    search.Results = connection.Query<Paper>(search.SqlQuery);
                     sw.Stop();
-                    model.QueryTime = sw.ElapsedMilliseconds;
-                    return View(model);
+                    search.QueryTime = sw.ElapsedMilliseconds;
+                    var logger = new SearchQueryLogger();
+                    try
+                    {
+                        await logger.Log(connection, search);
+                    }
+                    catch(Exception e)
+                    {
+
+                    }
+                    return View(search);
                 }
             }
             else
