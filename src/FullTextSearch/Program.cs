@@ -14,7 +14,8 @@ namespace FullTextSearch
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
+                .UseKestrel()
+                .UseUrls("http://0.0.0.0:7923")
                 .UseStartup<Startup>()
                 .Build();
 
