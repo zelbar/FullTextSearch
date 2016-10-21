@@ -1,0 +1,35 @@
+﻿@model IEnumerable<FullTextSearch.Models.Paper>
+
+@{ 
+    ViewBag.Title = "Papers list";
+}
+
+<div class="page-header">
+    <h2>@ViewBag.Title</h2>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th width="200"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var paper in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Details" asp-route-id="@paper.Id"><span class="badge">@paper.EventType</span> @paper.Title</a>
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a asp-action="Details" asp-route-id="@paper.Id" class="btn btn-info"><span class="glyphicon glyphicon-info-sign"></span> More</a>
+                        <a href="/paper/@paper.PdfName" title="@paper.PdfName" class="btn btn-primary"><span class="glyphicon glyphicon-download-alt"></span> PDF</a>
+                    </div>
+                </td>
+            </tr>
+
+        }
+    </tbody>
+</table>

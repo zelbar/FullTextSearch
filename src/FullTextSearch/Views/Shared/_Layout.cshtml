@@ -37,13 +37,26 @@
                         </a>
                     </li>
                     <li>
-                        <a asp-area="" asp-controller="Paper" asp-action="Add">
-                            <span class="glyphicon glyphicon-plus-sign"></span> 
-                            Add new paper
+                        <a href="#" data-toggle="dropdown" role="button" aria-haspopup="true">
+                            <span class="glyphicon glyphicon-duplicate"></span> Papers <span class="caret"></span>
                         </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a asp-area="" asp-controller="Paper" asp-action="Add">
+                                    <span class="glyphicon glyphicon-plus-sign"></span>
+                                    Add new paper
+                                </a>
+                            </li>
+                            <li>
+                                <a asp-controller="Paper" asp-action="Index">
+                                    <span class="glyphicon glyphicon-list"></span> 
+                                    List all papers
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li>
-                        <a asp-area="" asp-controller="Index" asp-action="Analysis">
+                        <a asp-area="" asp-controller="Analysis" asp-action="Index">
                             <span class="glyphicon glyphicon-stats"></span> 
                             Analysis
                         </a>

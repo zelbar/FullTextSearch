@@ -1,0 +1,32 @@
+﻿@model FullTextSearch.Models.Paper
+
+@{ 
+    ViewBag.Title = Model.Title;
+}
+
+<div class="page-header">
+    <div class="pull-right">
+
+        <a href="/paper/@Model.PdfName" title="@Model.PdfName" class="btn btn-primary">
+            <span class="glyphicon glyphicon-download-alt"></span> PDF
+        </a>
+        <a class="btn btn-sm btn-success" asp-action="Edit" asp-controller="Paper" asp-route-id="@Model.Id">
+            <span class="glyphicon glyphicon-edit"></span>
+            Edit
+        </a>
+        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-controller="Paper" asp-route-id="@Model.Id">
+            <span class="glyphicon glyphicon-trash"></span>
+            Delete
+        </a>
+    </div>
+    <small>@Model.EventType: </small>
+    <h2>@Model.Title</h2>
+</div>
+
+<blockquote class="text-justify">
+    @Model.Abstract
+</blockquote>
+
+<div class="text-justify">
+    @Model.PaperText
+</div>

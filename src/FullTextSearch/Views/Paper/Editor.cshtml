@@ -1,0 +1,71 @@
+﻿@model FullTextSearch.Models.Paper
+
+@{ 
+    ViewBag.Title = "Paper form";
+}
+
+<style>
+    textarea {
+        min-width: 100%;
+        height: 50%;
+    }
+    #Abstract {
+        min-height: 200px;
+    }
+    #PaperText {
+        min-height: 500px;
+    }
+</style>
+
+<h2>@ViewBag.Title</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">
+        <span class="glyphicon glyphicon-info-sign"></span> 
+        @TempData["Message"]
+    </div>
+
+}
+
+<form method="post">
+    <fieldset>
+        <div class="form-group col-md-8">
+            <label asp-for="Title" class="control-label">Title</label>
+            <textarea asp-for="Title" class="form-control"></textarea>
+        </div>
+        <div class="form-group col-sm-2">
+            <label asp-for="Id" class="control-label">Identificator</label>
+            <input type="number" asp-for="Id" class="form-control" />
+        </div>
+        <div class="form-group col-md-2">
+            <label asp-for="EventType" class="control-label">Event type</label>
+            <select asp-for="EventType" class="form-control">
+                <option>Oral</option>
+                <option>Poster</option>
+                <option>Spotlight</option>
+            </select>
+        </div>
+    </fieldset>
+
+    <fieldset class="well">
+        <legend>Abstract</legend>
+        <textarea asp-for="Abstract" class="input-lg"></textarea>
+    </fieldset>
+
+    <fieldset class="well">
+        <legend>Paper text</legend>
+        <textarea asp-for="PaperText" class="input-lg"></textarea>
+    </fieldset>
+
+    <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-ok"></span> 
+        Save
+    </button>
+</form>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}

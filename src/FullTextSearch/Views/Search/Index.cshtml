@@ -4,21 +4,33 @@
     ViewBag.Title = "Search";
 }
 
+<style>
+    #common-terms-list > li {
+        display: inline-block;
+        margin: 5px;
+        margin-left: 0;
+    }
+</style>
 
 <form name="search" id="search-form" class="page-header col-xs-12" method="get">
     <div class="col-sm-5 col-xs-12">
         <div class="input-group">
             <span class="input-group-btn">
-                <button type="submit" class="btn btn-primary">
-                    <span class="glyphicon glyphicon-search"></span>
+                <button type="reset" class="btn btn-danger" title="Reset">
+                    <span class="glyphicon glyphicon-remove-sign"></span>
                 </button>
             </span>
             <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary" title="Search">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </span>
         </div>
     </div>
     <div class="col-sm-7 col-xs-12">
-        <label asp-for="NumberOfResults" class="control-label col-sm-6 col-xs-12">Number of results</label>
-        <input type="range" min="1" max="500" class="col-sm-6 col-xs-12" asp-for="NumberOfResults" />
+        <label asp-for="NumberOfResults" class="control-label col-sm-6 col-xs-12">Number of results per page</label>
+        <input type="range" min="1" max="100" class="col-sm-6 col-xs-12" asp-for="NumberOfResults" />
         <span id="num-of-res-indicator" class="badge col-xs-1 hidden-xs">@Model.NumberOfResults</span>
         <input type="hidden" asp-for="Page" />
     </div>
@@ -63,7 +75,7 @@
             if (results > 0)
             {
                 <div class="page-header">
-                    There were <strong>@results</strong> results found. Showing page @Model.Page<br />
+                    Showing <strong>@results</strong> results, page @Model.Page<br />
                 </div>
                 @foreach (var result in Model.Results)
                 {
@@ -79,13 +91,9 @@
                         <div class="collapse dropdown" id="result-@result.Id">
                             <div class="panel-body">
                                 <div class="pull-right">
-                                    <a class="btn btn-sm btn-success" asp-action="Edit" asp-controller="Paper" asp-route-id="@result.Id">
-                                        <span class="glyphicon glyphicon-edit"></span>
-                                        Edit
-                                    </a>
-                                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-controller="Paper" asp-route-id="@result.Id">
-                                        <span class="glyphicon glyphicon-trash"></span>
-                                        Delete
+                                    <a class="btn btn-sm btn-info" asp-action="Details" asp-controller="Paper" asp-route-id="@result.Id">
+                                        <span class="glyphicon glyphicon-info-sign"></span>
+                                        Details
                                     </a>
                                 </div>
                                 <h4>@Html.Raw(result.Abstract)</h4>
@@ -109,29 +117,42 @@
                 </p>
             }
 
-            <div class="btn-block">
+            <ul class="pagination btn-group-justified">
                 @if (Model.Page > 1)
                 {
-                    <a id="previous-results" class="btn btn-default">
-                        <span class="glyphicon glyphicon-circle-arrow-left"></span>
-                        Previous results
-                    </a>
+                    <li>
+                        <a href="#" id="previous-results" class="previous btn-default">
+                            <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                            Previous results
+                        </a>
+                    </li>
+
+                }
+                @for (int i = 1; i < Model.Page; ++i)
+                {
+
 
                 }
                 @if (Model.Results.Count() == Model.NumberOfResults)
                 {
-                    <a id="more-results" class="btn btn-primary">
-                        More results
-                        <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                    </a>
+                    <li>
+                        <a href="#" id="more-results" class="next btn-primary">
+                            More results
+                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                        </a>
+                    </li>
 
                 }
-            </div>
+            </ul>
 
         }
         else
         {
-            <p>Have fun</p>
+            <div id="search-suggest" class="collapse dropdown">
+                <p>No idea what to search for? Try for some of these common lexemes!</p>
+                <ul id="common-terms-list"></ul>
+                <a href="javascript:getTerms()" id="more-terms">More <span class="glyphicon glyphicon-menu-right"></span></a>
+            </div>
         }
     </div>
 </div>
@@ -165,7 +186,31 @@
         });
         $('#previous-results').on('click', function () {
             window.history.back();
-
         });
+        @if (Model.Results == null)
+        {
+            <text>
+        function getTerms(n) {
+            if ($(n).empty()) n = 20;
+            $.get('/Search/CommonTerms?n='+n, null, function (data) {
+                var ctl = $('#common-terms-list');
+                ctl.html('');
+                $.each(data, function () {
+                    ctl.append(
+                        '<li><a href="#">' + this + '</a></li>'
+                        );
+                });
+                $('#search-suggest').show();
+                $('#common-terms-list li a').on('click', function (item) {
+                    $('#Query').val($(this).html());
+                    $('#search-form').submit();
+
+                });
+            });
+        }
+        getTerms();
+            </text>
+
+        }
     </script>
 }

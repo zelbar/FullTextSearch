@@ -63,5 +63,18 @@ namespace FullTextSearch.Controllers
                 return View(new Search());
             }
         }
+
+        public IActionResult CommonTerms(int n = 10)
+        {
+            var rnd = new Random();
+            var list = Connection.Query<string>(
+                @"SELECT * FROM ts_stat('SELECT tsv FROM paper')
+WHERE word ~ '^[^0-9]+$'
+ORDER BY nentry DESC, ndoc DESC, word
+LIMIT @Number OFFSET @Rand;"
+            .Replace("@Number", n.ToString())
+            .Replace("@Rand", rnd.Next(0, 500).ToString()));
+            return new JsonResult(list);
+        }
     }
 }
