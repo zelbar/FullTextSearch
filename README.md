@@ -21,3 +21,8 @@ Install PostgreSQL 9.5+ and ASP.NET Core 1.0.1 (Windows/Linux/Mac).
 Run from shell these commands in the root of the repository
 ``dotnet restore
 dotnet run``
+
+## References
+[PostgreSQL: A full text search engine](http://shisaa.jp/postset/postgresql-full-text-search-part-1.html)
+[Full text search in milliseconds with PostgreSQL](https://blog.lateral.io/2015/05/full-text-search-in-milliseconds-with-postgresql/)
+[PostgreSQL Full Text Search Is Good Enough!](http://rachbelaid.com/postgres-full-text-search-is-good-enough/)

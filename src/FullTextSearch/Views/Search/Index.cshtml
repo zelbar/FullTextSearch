@@ -12,48 +12,54 @@
     }
 </style>
 
-<form name="search" id="search-form" class="page-header col-xs-12" method="get">
-    <div class="col-sm-5 col-xs-12">
-        <div class="input-group">
-            <span class="input-group-btn">
-                <button type="reset" class="btn btn-danger" title="Reset">
-                    <span class="glyphicon glyphicon-remove-sign"></span>
-                </button>
-            </span>
-            <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
-            <span class="input-group-btn">
-                <button type="submit" class="btn btn-primary" title="Search">
-                    <span class="glyphicon glyphicon-search"></span>
-                </button>
-            </span>
+<form name="search" id="search-form" class="page-header" method="get">
+    <div class="row">
+        <div class="col-sm-5 col-xs-12">
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <button type="submit" class="btn btn-primary" title="Search">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </span>
+                <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <label asp-for="NumberOfResults" class="control-label col-md-5">
+                Results per page
+                <span id="num-of-res-indicator" class="badge">@Model.NumberOfResults</span>
+            </label>
+            <input type="range" min="5" step="5" max="100" class="" asp-for="NumberOfResults" />
+            <input type="hidden" asp-for="Page" />
         </div>
     </div>
-    <div class="col-sm-7 col-xs-12">
-        <label asp-for="NumberOfResults" class="control-label col-sm-6 col-xs-12">Number of results per page</label>
-        <input type="range" min="1" max="100" class="col-sm-6 col-xs-12" asp-for="NumberOfResults" />
-        <span id="num-of-res-indicator" class="badge col-xs-1 hidden-xs">@Model.NumberOfResults</span>
-        <input type="hidden" asp-for="Page" />
+    <div class="row">
+        <div class="col-sm-5">
+            Operator:
+            <label>
+                <input type="radio" asp-for="Operator" value="0" checked /> AND
+            </label>
+            <label>
+                <input type="radio" asp-for="Operator" value="1" /> OR
+            </label>
+            <label>&nbsp;
+                <input type="checkbox" asp-for="ExpandResults" />
+                <small>Expand results</small>
+            </label>
+        </div>
+        <div class="col-sm-7">
+            Type of search
+            <label>
+                <input type="radio" asp-for="Type" id="Type-1" value="0" checked />
+                <span class="form-label">Morphology&amp;semantic</span>
+            </label>
+            <label>
+                <input type="radio" asp-for="Type" id="Type-2" value="1" />
+                <span class="form-label">Fuzzy matching</span>
+            </label>
+        </div>
     </div>
-    <div class="col-md-5 col-sm-4">
-        Concatenation operator:
-        <label>
-            <input type="radio" asp-for="Operator" value="0" checked /> AND
-        </label>
-        <label>
-            <input type="radio" asp-for="Operator" value="1" /> OR
-        </label>
-    </div>
-    <div class="col-md-7 col-sm-8">
-        Type of search
-        <label>
-            <input type="radio" asp-for="Type" value="0" checked />
-            <span class="form-label">Morphology&amp;semantic</span>
-        </label>
-        <label>
-            <input type="radio" asp-for="Type" value="1" />
-            <span class="form-label">Fuzzy matching</span>
-        </label>
-    </div>
+
 </form>
 <span class="clearfix"></span>
 <div class="container">
@@ -84,20 +90,18 @@
                             <span class="badge">
                                 @result.EventType
                             </span>
-                            <a class="panel-title" data-toggle="collapse" data-target="#result-@result.Id">
+                            <a class="panel-title" @if(!Model.ExpandResults) {<text>data-toggle="collapse" data-target="#result-@result.Id"</text>}>
                                 @Html.Raw(result.Title)
                             </a>
                         </div>
-                        <div class="collapse dropdown" id="result-@result.Id">
+                        <div @if(!Model.ExpandResults) {<text>class="collapse dropdown"</text>} id="result-@result.Id">
                             <div class="panel-body">
-                                <div class="pull-right">
-                                    <a class="btn btn-sm btn-info" asp-action="Details" asp-controller="Paper" asp-route-id="@result.Id">
-                                        <span class="glyphicon glyphicon-info-sign"></span>
-                                        Details
-                                    </a>
-                                </div>
                                 <h4>@Html.Raw(result.Abstract)</h4>
                                 <h5>@Html.Raw(result.PaperText)</h5>
+                                <a class="alert-link" asp-action="Details" asp-controller="Paper" asp-route-id="@result.Id">
+                                    <span class="glyphicon glyphicon-hand-right"></span> 
+                                    View paper
+                                </a>
                             </div>
                             <div class="panel-footer small">
                                 <a href="/paper/@result.PdfName">
@@ -151,40 +155,54 @@
             <div id="search-suggest" class="collapse dropdown">
                 <p>No idea what to search for? Try for some of these common lexemes!</p>
                 <ul id="common-terms-list"></ul>
-                <a href="javascript:getTerms()" id="more-terms">More <span class="glyphicon glyphicon-menu-right"></span></a>
+                <a href="javascript:getTerms()" id="more-terms">Load more <span class="glyphicon glyphicon-menu-right"></span></a>
+
+                <div class="info">
+                    <h3>Hints</h3>
+                    <p>Use double quotes eg. <samp>"fast algorithm"</samp> to denote search for documents containing both words.</p>
+                    <p>Use operators <code>&</code> (and) for conjunction, <code>|</code> (or) for disjunction, <code>!</code> (not) for negation.</p>
+                    <p>You can also use the expression <code>:*</code> at the end of a word to replace a missing part, eg. <code>math:+</code>
+                    would match <samp>mathematics</samp>, <samp>mathematician</samp>, <samp>mathematical</samp> etc.
+                    </p>
+                </div>
             </div>
         }
     </div>
 </div>
 
-<div id="loading" class="well page-header col-xs-12">
-    <span class="glyphicon glyphicon-search"></span> 
-    Searching...
-</div>
-
 @section Scripts {
     <script>
-        $('#loading').hide();
+        var incr = false;
+        function increasePage() {
+            if (!incr) {
+                incr = true;
+                var p = $('#Page');
+                p.val(p.val() * 1 + 1);
+            }
+        }
         $('#NumberOfResults').on('change', function () {
             $('#num-of-res-indicator').html(this.value);
             $('#Page').val(1);
         });
         $('#search-form').on('submit', function () {
-            $('#results').hide();
-            $('#loading').show();
+            //$('#results').hide();
         });
         $('#Query').on('change', function () {
+            $('#Page').val(1);
+        });
+        $('#search-form input[type="radio"]').on('change', function () {
             $('#Page').val(1);
         });
         $('#Operator').on('change', function () {
             $('#Page').val(1);
         })
-        $('#more-results').on('click', function () {
-            var p = $('#Page');
-            p.val(p.val()*1 + 1);
+        $('#more-results').on('click', function (evt) {
+            evt.preventDefault();
+            increasePage();
             $('#search-form').submit();
         });
-        $('#previous-results').on('click', function () {
+        $('#previous-results').on('click', function (evt) {
+            evt.preventDefault();
             window.history.back();
         });
         @if (Model.Results == null)
