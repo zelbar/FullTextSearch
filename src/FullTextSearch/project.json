@@ -1,6 +1,7 @@
 ﻿{
   "dependencies": {
     "Dapper": "1.50.2",
+    "Gulp.js": "1.0.2",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
     "Microsoft.AspNetCore.Mvc": "1.0.1",
     "Microsoft.AspNetCore.Razor.Tools": {
@@ -23,11 +24,18 @@
       "type": "platform"
     },
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
-    "Npgsql": "3.1.7"
+    "Npgsql": "3.1.8"
+  },
+
+  "devDependencies": {
+    "gulp": "3.8.11",
+    "gulp-concat": "2.5.2",
+    "gulp-cssmin": "0.1.7",
+    "gulp-uglify": "1.2.0",
+    "rimraf": "2.2.8"
   },
 
   "tools": {
-    "BundlerMinifier.Core": "2.0.238",
     "Microsoft.AspNetCore.Razor.Tools": "1.0.0-preview2-final",
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.0.0-preview2-final"
   },
