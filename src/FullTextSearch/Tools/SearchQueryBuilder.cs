@@ -51,15 +51,7 @@ namespace FullTextSearch.Tools
                 for (int i = 0; i < query.Length; ++i)
                 {
                     if (query[i] == '\"')
-                    {
-                        var t = query.ToCharArray();
-                        t[i] = '(';
-                        query = t.ToString();
                         do { ++i; } while (query[i] != '\"');
-                        t = query.ToCharArray();
-                        t[i] = ')';
-                        query = t.ToString();
-                    }
                     else
                         withoutQuotesSb.Append(query[i]);
                 }
