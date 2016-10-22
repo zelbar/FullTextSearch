@@ -17,10 +17,9 @@ textarea {
     max-width: 500px;
 }
 
-/* Make .svg files in the carousel display properly in older browsers */
-.carousel-inner .item img[src$=".svg"]
-{
-    width: 100%;
+footer img {
+    height: 32px;
+    width: 32px;
 }
 
 .search-box {
