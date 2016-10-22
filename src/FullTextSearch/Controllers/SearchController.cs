@@ -31,7 +31,7 @@ namespace FullTextSearch.Controllers
             _connectionString = configuration.GetConnectionString("Default");
         }
 
-        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(NoStore = true)]
         public async Task<IActionResult> Index(Search search)
         {
             if (!string.IsNullOrEmpty(search.Query))

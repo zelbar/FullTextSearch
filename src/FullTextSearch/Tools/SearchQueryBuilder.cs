@@ -65,23 +65,21 @@ namespace FullTextSearch.Tools
         public string SqlQuery(SearchType type, int numberOfResults = 10, int page = 1)
         {
             if (page < 1) page = 1;
-            return
-    @"SELECT 	id, pdfname, eventtype
-	, ts_headline(result.title, query) AS title
-	, ts_headline(result.abstract, query) AS abstract
-	, ts_headline(result.papertext, query) AS papertext
-FROM (
+            var sb = new StringBuilder();
+            sb.AppendLine("SELECT 	id, pdfname, eventtype");
+            sb.AppendLine("	, ts_headline(result.title, query, \'HighlightAll=true\') AS title");
+            sb.AppendLine("	, ts_headline(result.abstract, query, \'MaxFragments=2,MaxWords=25,MinWords=12\') AS abstract");
+            sb.AppendLine("	, ts_headline(result.papertext, query, \'MaxFragments=4,MaxWords=50,MinWords=25,FragmentDelimiter=<br/><br/>\') AS papertext");
+            sb.AppendLine(@"FROM (
 	SELECT	*
-	FROM    public.paper AS paper
-		, to_tsquery('english', '@TSQuery') AS query
-		, ts_rank_cd(tsv, query, 2) AS rank
+	FROM    public.paper AS paper");
+            sb.AppendLine("	, to_tsquery('english', '" + TSQuery + "') AS query");
+            sb.AppendLine(@"	, ts_rank_cd(tsv, query, 2) AS rank
 	WHERE   tsv @@ query
-	ORDER BY rank DESC
-	LIMIT @NumberOfResults OFFSET (@Page - 1) * @NumberOfResults
-) AS result;"
-            .Replace("@TSQuery", TSQuery)
-            .Replace("@NumberOfResults", numberOfResults.ToString())
-            .Replace("@Page", page.ToString());
+	ORDER BY rank DESC");
+            sb.AppendLine("	LIMIT " + numberOfResults.ToString()+" OFFSET ("+page.ToString()+" - 1) * "+numberOfResults.ToString()+"");
+            sb.AppendLine(") AS result;");
+            return sb.ToString();
         }
     }
 }
