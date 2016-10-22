@@ -36,23 +36,32 @@ namespace FullTextSearch.Tools
         {
             get
             {
-                var rv = new StringBuilder();
-                var quotes = Regex.Matches(_userQuery, "\"([^\"]*)\"");
+                var query = _userQuery;
+                var quotes = Regex.Matches(query, "\"([^\"]*)\"");
                 var concatenator = (_op == SearchConcatenationOperator.and) ? '&' : '|';
                 var quotedList = new List<string>();
                 foreach (var quote in quotes)
                 {
                     quotedList.Add((quote.ToString().Replace("\"", "").Replace(' ', '&')));
                 }
+                var rv = new StringBuilder();
                 rv.Append(string.Join(concatenator.ToString(), quotedList));
                 
                 var withoutQuotesSb = new StringBuilder();
-                for (int i = 0; i < _userQuery.Length; ++i)
+                for (int i = 0; i < query.Length; ++i)
                 {
-                    if (_userQuery[i] == '\"')
-                    do { ++i; } while (_userQuery[i] != '\"');
+                    if (query[i] == '\"')
+                    {
+                        var t = query.ToCharArray();
+                        t[i] = '(';
+                        query = t.ToString();
+                        do { ++i; } while (query[i] != '\"');
+                        t = query.ToCharArray();
+                        t[i] = ')';
+                        query = t.ToString();
+                    }
                     else
-                        withoutQuotesSb.Append(_userQuery[i]);
+                        withoutQuotesSb.Append(query[i]);
                 }
                 string withoutQuotes = withoutQuotesSb.ToString().Trim();
                 if (quotedList.Count > 0 && withoutQuotes.Count() > 0)
@@ -62,21 +71,48 @@ namespace FullTextSearch.Tools
             }
         }
 
+        /// <summary>
+        /// Query user for similarity check (Trigram) in PostgreSQL
+        /// </summary>
+        public string SimilarityQuery
+        {
+            get
+            {
+                return _userQuery.Trim();
+            }
+        }
+
         public string SqlQuery(SearchType type, int numberOfResults = 10, int page = 1)
         {
             if (page < 1) page = 1;
             var sb = new StringBuilder();
             sb.AppendLine("SELECT 	id, pdfname, eventtype");
-            sb.AppendLine("	, ts_headline(result.title, query, \'HighlightAll=true\') AS title");
-            sb.AppendLine("	, ts_headline(result.abstract, query, \'MaxFragments=2,MaxWords=25,MinWords=12\') AS abstract");
-            sb.AppendLine("	, ts_headline(result.papertext, query, \'MaxFragments=4,MaxWords=50,MinWords=25,FragmentDelimiter=<br/><br/>\') AS papertext");
+            sb.AppendLine("	, ts_headline(result.title, tsquery, \'HighlightAll=true\') AS title");
+            sb.AppendLine("	, ts_headline(result.abstract, tsquery, \'MaxFragments=2,MaxWords=50,MinWords=12\') AS abstract");
+            sb.AppendLine("	, ts_headline(result.papertext, tsquery, \'MaxFragments=4,MaxWords=75,MinWords=25,FragmentDelimiter=<br/><br/>\') AS papertext");
+
+            if (type == SearchType.MorphologyAndSemantics) sb.AppendLine("	, rank");
+            else if (type == SearchType.FuzzyMatching) sb.AppendLine("	, titlesim + abstractsim AS rank");
+
             sb.AppendLine(@"FROM (
 	SELECT	*
 	FROM    public.paper AS paper");
-            sb.AppendLine("	, to_tsquery('english', '" + TSQuery + "') AS query");
-            sb.AppendLine(@"	, ts_rank_cd(tsv, query, 2) AS rank
-	WHERE   tsv @@ query
-	ORDER BY rank DESC");
+            sb.AppendLine("		, to_tsquery('english', '" + TSQuery + "') AS tsquery");
+
+            if (type == SearchType.MorphologyAndSemantics)
+            {
+                sb.AppendLine("		, ts_rank_cd(tsv, tsquery, 2) AS rank");
+                sb.AppendLine("	WHERE   tsv @@ tsquery");
+                sb.AppendLine("	ORDER BY rank DESC");
+            }
+            else if (type == SearchType.FuzzyMatching)
+            {
+                sb.AppendLine(@"		, similarity(lower(paper.title), lower('"+SimilarityQuery+"')) AS titlesim");
+                sb.AppendLine("		, similarity(lower(paper.abstract), lower('"+SimilarityQuery+"')) AS abstractsim");
+                sb.AppendLine("	WHERE   titlesim + abstractsim >= 0.05");
+                sb.AppendLine("	ORDER BY titlesim + abstractsim DESC");
+            }
+            
             sb.AppendLine("	LIMIT " + numberOfResults.ToString()+" OFFSET ("+page.ToString()+" - 1) * "+numberOfResults.ToString()+"");
             sb.AppendLine(") AS result;");
             return sb.ToString();

@@ -4,17 +4,9 @@
     ViewBag.Title = "Search";
 }
 
-<style>
-    #common-terms-list > li {
-        display: inline-block;
-        margin: 5px;
-        margin-left: 0;
-    }
-</style>
-
 <form name="search" id="search-form" class="page-header" method="get">
     <div class="row">
-        <div class="col-sm-5 col-xs-12">
+        <div class="col-sm-7 col-xs-12">
             <div class="input-group">
                 <span class="input-group-btn">
                     <button type="submit" class="btn btn-primary" title="Search">
@@ -24,7 +16,7 @@
                 <input type="search" asp-for="Query" class="form-control search-box" placeholder="Enter search terms..." />
             </div>
         </div>
-        <div class="col-sm-7">
+        <div class="col-sm-5">
             <label asp-for="NumberOfResults" class="control-label col-md-5">
                 Results per page
                 <span id="num-of-res-indicator" class="badge">@Model.NumberOfResults</span>
@@ -34,6 +26,17 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-sm-7">
+            Type of search
+            <label>
+                <input type="radio" asp-for="Type" id="Type-1" value="0" checked />
+                <span class="form-label">Morphology&amp;semantic</span>
+            </label>
+            <label>
+                <input type="radio" asp-for="Type" id="Type-2" value="1" />
+                <span class="form-label">Fuzzy matching</span>
+            </label>
+        </div>
         <div class="col-sm-5">
             Operator:
             <label>
@@ -47,22 +50,11 @@
                 <small>Expand results</small>
             </label>
         </div>
-        <div class="col-sm-7">
-            Type of search
-            <label>
-                <input type="radio" asp-for="Type" id="Type-1" value="0" checked />
-                <span class="form-label">Morphology&amp;semantic</span>
-            </label>
-            <label>
-                <input type="radio" asp-for="Type" id="Type-2" value="1" />
-                <span class="form-label">Fuzzy matching</span>
-            </label>
-        </div>
     </div>
 
 </form>
 <span class="clearfix"></span>
-<div class="container">
+<div class="">
     <div id="results">
         @if (Model.Results != null)
         {
@@ -75,7 +67,7 @@
                     </a>
                 </div>
                 <div class="panel-body panel-collapse collapse dropdown" id="search-query">
-                    <pre>@Html.Raw(Model.SqlQuery)</pre>
+                    <pre>@Model.SqlQuery</pre>
                 </div>
             </div>
             if (results > 0)
@@ -83,15 +75,19 @@
                 <div class="page-header">
                     Showing <strong>@results</strong> results, page @Model.Page<br />
                 </div>
+                int rank = Model.NumberOfResults * (Model.Page - 1);
                 @foreach (var result in Model.Results)
                 {
+                    ++rank;
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <span class="badge">
-                                @result.EventType
-                            </span>
+                            <samp class="pull-right">[@result.Rank]</samp>
+                            <code>#@rank </code>
                             <a class="panel-title" @if(!Model.ExpandResults) {<text>data-toggle="collapse" data-target="#result-@result.Id"</text>}>
                                 @Html.Raw(result.Title)
+                                <span class="small">
+                                    (@result.EventType)
+                                </span>
                             </a>
                         </div>
                         <div @if(!Model.ExpandResults) {<text>class="collapse dropdown"</text>} id="result-@result.Id">

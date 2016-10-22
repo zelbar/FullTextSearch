@@ -23,5 +23,7 @@ namespace FullTextSearch.Models
 
         [Required]
         public string PaperText { get; set; }
+
+        public double Rank { get; set; }
     }
 }
