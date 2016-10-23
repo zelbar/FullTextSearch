@@ -19,7 +19,5 @@ namespace FullTextSearch.Models
 
         [Required]
         public AnalysisType Type { get; set; }
-
-        public string[][] Results { get; set; }
     }
 }

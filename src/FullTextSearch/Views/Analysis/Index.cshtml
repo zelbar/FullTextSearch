@@ -6,10 +6,8 @@
 
 <link rel="stylesheet" href="~/lib/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
 
-<h1>@ViewBag.Title</h1>
-
-<form method="get">
-    <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-6">
+<form method="get" class="page-header">
+    <div class="form-group col-xl-2 col-lg-3 col-sm-4">
         <label class="control-label">From</label>
         <div class="input-group date">
             <input type="datetime" asp-for="From" class="form-control" />
@@ -18,7 +16,7 @@
             </span>
         </div>
     </div>
-    <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-6">
+    <div class="form-group col-xl-2 col-lg-3 col-sm-4">
         <label class="control-label">To</label>
         <div class="input-group date">
             <input type="datetime" asp-for="To" class="form-control" />
@@ -27,13 +25,19 @@
             </span>
         </div>
     </div>
-    <div class="form-group col-xl-4">
+    <div class="form-group col-xl-4 col-lg-3 col-sm-4">
         <label class="control-label">Term</label>
-        <input type="text" asp-for="Term" class="form-control" />
+        <div class="input-group">
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </span>
+            <input type="text" asp-for="Term" class="form-control" />
+        </div>
     </div>
-    <div class="form-group col-xl-4 col-lg-6 col-md-4 col-sm-12">
-        <p class="col-md-12 col-sm-2">Granulation</p>
-        <div class="col-md-12 col-sm-10">
+    <div class="form-group col-md-6 col-sm-12">
+        <span>Granulation</span>
             <label>
                 <input type="radio" asp-for="Type" value="0" />
                 Year and month
@@ -42,13 +46,52 @@
                 <input type="radio" asp-for="Type" value="1" />
                 Day and hour
             </label>
-        </div>
     </div>
 </form>
 
+<div class="container">
+    @if (ViewBag.Table != null)
+    {
+        <table class="table table-stripped">
+            <thead>
+                <tr>
+                    @{var t = ((IEnumerable<dynamic>)ViewBag.Table); }
+                    @if (t.Count() > 0)
+                    {
+                        foreach (var col in t.FirstOrDefault())
+                        {
+                            <th>@col.Key</th>
+                        }
+                    }
+                    else
+                    {
+                        <text><td class="alert alert-warning">No results</td></text>
+
+                    }
+                </tr>
+            </thead>
+
+
+            @foreach (var row in ViewBag.Table)
+            {
+                <tr>
+                    @foreach (var col in row)
+                    {
+                        <td>@col.Value</td>
+
+                    }
+                </tr>
+
+            }
+        </table>
+
+                        }
+</div>
+
 @section scripts {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery-validation/build/release.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/moment/min/moment.min.js"></script>
     <script src="~/lib/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
     <script>
         $(function () {

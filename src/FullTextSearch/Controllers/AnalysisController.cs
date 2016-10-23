@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using Npgsql;
 using Microsoft.Extensions.Configuration;
+using Dapper;
+using FullTextSearch.Tools;
 
 namespace FullTextSearch.Controllers
 {
@@ -28,6 +30,11 @@ namespace FullTextSearch.Controllers
         }
         public IActionResult Index(Analysis model)
         {
+            if (!string.IsNullOrEmpty(model.Term))
+            {
+                var qb = new AnalysisQueryBuilder(model);
+                ViewBag.Table = Connection.Query(qb.Build());
+            }
             return View(model);
         }
     }
