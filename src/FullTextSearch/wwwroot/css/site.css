@@ -17,9 +17,17 @@ textarea {
     max-width: 500px;
 }
 
-footer img {
+input[type="date"], input[type="datetime"] {
+    max-width: 250px;
+}
+
+footer a img {
     height: 32px;
     width: 32px;
+    opacity: 0.5;
+}
+footer a:hover img {
+    opacity: 1;
 }
 
 .search-box {
