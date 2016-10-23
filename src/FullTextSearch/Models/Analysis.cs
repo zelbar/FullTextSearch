@@ -19,5 +19,11 @@ namespace FullTextSearch.Models
 
         [Required]
         public AnalysisType Type { get; set; }
+
+        public Analysis()
+        {
+            From = DateTime.UtcNow.AddDays(-1);
+            To = DateTime.UtcNow.AddDays(1);
+        }
     }
 }

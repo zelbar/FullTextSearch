@@ -39,7 +39,7 @@
     <div class="form-group col-md-6 col-sm-12">
         <span>Granulation</span>
             <label>
-                <input type="radio" asp-for="Type" value="0" />
+                <input type="radio" asp-for="Type" value="0" checked />
                 Year and month
             </label>
             <label>
@@ -52,7 +52,7 @@
 <div class="container">
     @if (ViewBag.Table != null)
     {
-        <table class="table table-stripped">
+        <table class="table table-stripped table-responsive">
             <thead>
                 <tr>
                     @{var t = ((IEnumerable<dynamic>)ViewBag.Table); }
@@ -60,7 +60,7 @@
                     {
                         foreach (var col in t.FirstOrDefault())
                         {
-                            <th>@col.Key</th>
+                            <th>@col.Key.Replace(" AM", "am").Replace(" PM", "pm")</th>
                         }
                     }
                     else
