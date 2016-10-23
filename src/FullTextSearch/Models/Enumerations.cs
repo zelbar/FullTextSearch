@@ -7,4 +7,5 @@ namespace FullTextSearch.Models
 {
     public enum SearchConcatenationOperator { and, or };
     public enum SearchType { MorphologyAndSemantics, FuzzyMatching };
+    public enum AnalysisType { YearMonth, DayHour };
 }

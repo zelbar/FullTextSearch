@@ -1,0 +1,67 @@
+﻿@model FullTextSearch.Models.Analysis
+
+@{ 
+    ViewBag.Title = "Analysis";
+}
+
+<link rel="stylesheet" href="~/lib/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
+
+<h1>@ViewBag.Title</h1>
+
+<form method="get">
+    <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-6">
+        <label class="control-label">From</label>
+        <div class="input-group date">
+            <input type="datetime" asp-for="From" class="form-control" />
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+    </div>
+    <div class="form-group col-xl-2 col-lg-3 col-md-4 col-sm-6">
+        <label class="control-label">To</label>
+        <div class="input-group date">
+            <input type="datetime" asp-for="To" class="form-control" />
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+    </div>
+    <div class="form-group col-xl-4">
+        <label class="control-label">Term</label>
+        <input type="text" asp-for="Term" class="form-control" />
+    </div>
+    <div class="form-group col-xl-4 col-lg-6 col-md-4 col-sm-12">
+        <p class="col-md-12 col-sm-2">Granulation</p>
+        <div class="col-md-12 col-sm-10">
+            <label>
+                <input type="radio" asp-for="Type" value="0" />
+                Year and month
+            </label>
+            <label>
+                <input type="radio" asp-for="Type" value="1" />
+                Day and hour
+            </label>
+        </div>
+    </div>
+</form>
+
+@section scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/build/release.js"></script>
+    <script src="~/lib/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script>
+        $(function () {
+            $('#From').datetimepicker();
+            $('#To').datetimepicker({
+                useCurrent: false //Important! See issue #1075
+            });
+            $("#From").on("dp.change", function (e) {
+                $('#To').data("DateTimePicker").minDate(e.date);
+            });
+            $("#To").on("dp.change", function (e) {
+                $('#From').data("DateTimePicker").maxDate(e.date);
+            });
+        });
+    </script>
+}

@@ -1,4 +1,4 @@
-﻿{
+{
   "dependencies": {
     "Dapper": "1.50.2",
     "Gulp.js": "1.0.2",
