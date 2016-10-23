@@ -6,7 +6,7 @@
 
 <link rel="stylesheet" href="~/lib/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
 
-<form method="get" class="page-header">
+<form method="get" class="row page-header">
     <div class="form-group col-xl-2 col-lg-3 col-sm-4">
         <label class="control-label">From</label>
         <div class="input-group date">
@@ -49,43 +49,43 @@
     </div>
 </form>
 
-<div class="container">
+<div class="row">
     @if (ViewBag.Table != null)
     {
-        <table class="table table-stripped table-responsive">
-            <thead>
-                <tr>
-                    @{var t = ((IEnumerable<dynamic>)ViewBag.Table); }
-                    @if (t.Count() > 0)
-                    {
-                        foreach (var col in t.FirstOrDefault())
+        <div class="table-responsive">
+            <table class="table table-striped table-condensed table-hover">
+                <thead>
+                    <tr>
+                        @{var t = ((IEnumerable<dynamic>)ViewBag.Table); }
+                        @if (t.Count() > 0)
                         {
-                            <th>@col.Key.Replace(" AM", "am").Replace(" PM", "pm")</th>
+                            foreach (var col in t.FirstOrDefault())
+                            {
+                                <th>@col.Key.Replace(" AM", "am").Replace(" PM", "pm")</th>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <text><td class="alert alert-warning">No results</td></text>
-
-                    }
-                </tr>
-            </thead>
-
-
-            @foreach (var row in ViewBag.Table)
-            {
-                <tr>
-                    @foreach (var col in row)
-                    {
-                        <td>@col.Value</td>
-
-                    }
-                </tr>
-
-            }
-        </table>
+                        else
+                        {
+                            <text>
+                            <td class="alert alert-warning">No results</td></text>
 
                         }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in ViewBag.Table)
+                    {
+                        <tr>
+                            @foreach (var col in row)
+                            {
+                                <td>@col.Value</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @section scripts {
