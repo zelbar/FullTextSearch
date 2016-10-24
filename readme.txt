@@ -39,7 +39,7 @@ Web front-end: Twitter Bootstrap, jQuery, DateTimePicker library
 
 +++ HOW TO RUN +++
 
-Install PostgreSQL 9.5+ at port 5432 with user 'fts' (password 'fts') as superuser for database 'fts' (or change the ConnectionString in /src/FullTextSearch/appsettings.json if different).
+Install PostgreSQL 9.5+ at port 5432 with user 'fts' (password 'fts') as superuser for database 'fts' (or change the ConnectionString in /src/FullTextSearch/appsettings.json if different). Restore the fts.backup database backup/dump file into the fts database.
 
 Install .NET Core (Windows, Linux, Mac): https://www.microsoft.com/net/core
 
