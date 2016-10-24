@@ -14,6 +14,7 @@ using System.Diagnostics;
 
 namespace FullTextSearch.Controllers
 {
+    [ResponseCache(CacheProfileName = "Default")]
     public class SearchController : Controller
     {
         private readonly string _connectionString;

@@ -28,6 +28,8 @@ namespace FullTextSearch.Controllers
         {
             _connectionString = configuration.GetConnectionString("Default");
         }
+
+        [ResponseCache(CacheProfileName = "Never")]
         public IActionResult Index(Analysis model)
         {
             if (!string.IsNullOrEmpty(model.Term))
