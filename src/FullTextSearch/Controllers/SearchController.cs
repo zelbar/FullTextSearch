@@ -14,7 +14,6 @@ using System.Diagnostics;
 
 namespace FullTextSearch.Controllers
 {
-    [ResponseCache(CacheProfileName = "Default")]
     public class SearchController : Controller
     {
         private readonly string _connectionString;
@@ -33,6 +32,7 @@ namespace FullTextSearch.Controllers
         }
 
         //[ResponseCache(NoStore = true)]
+        [ResponseCache(CacheProfileName = "Default")]
         public async Task<IActionResult> Index(Search search)
         {
             if (!string.IsNullOrEmpty(search.Query))
@@ -65,6 +65,7 @@ namespace FullTextSearch.Controllers
             }
         }
 
+        [ResponseCache(CacheProfileName = "Never")]
         public IActionResult CommonTerms(int n = 10)
         {
             var rnd = new Random();
